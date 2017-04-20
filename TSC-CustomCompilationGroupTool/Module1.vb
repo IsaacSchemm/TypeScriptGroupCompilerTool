@@ -46,7 +46,15 @@ Module Module1
                 GroupAll.Add(group)
             Next
             GroupAll.Compile().Wait()
+        Catch ae As AggregateException
+            For Each e In ae.InnerExceptions
+                Console.Error.WriteLine(e.Message)
+                Console.Error.WriteLine(e.StackTrace)
+                MsgBox(e.Message, MsgBoxStyle.Critical, e.GetType().Name)
+            Next
         Catch e As Exception
+            Console.Error.WriteLine(e.Message)
+            Console.Error.WriteLine(e.StackTrace)
             MsgBox(e.Message, MsgBoxStyle.Critical, e.GetType().Name)
         End Try
     End Sub

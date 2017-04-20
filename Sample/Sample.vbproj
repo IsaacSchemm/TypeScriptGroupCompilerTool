@@ -73,6 +73,7 @@
     <TypeScriptCompile Include="Scripts\libraries-page1or2.d.ts" />
     <TypeScriptCompile Include="Scripts\page2.ts" />
     <TypeScriptCompile Include="Scripts\shared.ts" />
+    <TypeScriptCompile Include="Scripts\Subdirectory\sharedsub.ts" />
   </ItemGroup>
   <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />
