@@ -77,14 +77,14 @@ Public Class CompilationGroup
             Await Task.Delay(250)
         End While
 
-        For DeletionAttempts = 0 To 5
+        For DeletionAttempts = 0 To 4
             Try
                 DeletionAttempts += 1
                 Directory.Delete(ProjectPath, True)
                 Exit For
-            Catch ex As Exception When DeletionAttempts < 5
+            Catch ex As Exception When DeletionAttempts < 4
             End Try
-            Await Task.Delay(250)
+            Await Task.Delay(500)
         Next
 
         If TSC.ExitCode <> 0 Then
