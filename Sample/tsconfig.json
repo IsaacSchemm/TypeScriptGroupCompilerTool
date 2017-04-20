@@ -1,0 +1,16 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es5",
+    "strictNullChecks": true
+  },
+  "exclude": [
+    "node_modules",
+    "Scripts/typings"
+  ]
+}
