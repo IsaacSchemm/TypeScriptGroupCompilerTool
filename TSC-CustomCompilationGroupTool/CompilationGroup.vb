@@ -53,8 +53,10 @@ Public Class CompilationGroup
             BaseConfig = Nothing
         End If
 
+        Dim ID = Guid.NewGuid().ToString()
+
         ' Set up a temporary folder for tsconfig.json
-        Dim ProjectPath = Path.Combine(Path.GetTempPath(), "TSC-CustomCompilationGroupTool-" & Guid.NewGuid().ToString())
+        Dim ProjectPath = Path.Combine(Path.GetTempPath(), "TSC-CustomCompilationGroupTool-" & ID)
         Directory.CreateDirectory(ProjectPath)
 
         ' Write a new tsconfig.json
@@ -75,7 +77,15 @@ Public Class CompilationGroup
             Await Task.Delay(250)
         End While
 
-        Directory.Delete(ProjectPath, True)
+        For DeletionAttempts = 0 To 5
+            Try
+                DeletionAttempts += 1
+                Directory.Delete(ProjectPath, True)
+                Exit For
+            Catch ex As Exception When DeletionAttempts < 5
+            End Try
+            Await Task.Delay(250)
+        Next
 
         If TSC.ExitCode <> 0 Then
             Dim Message As New StringBuilder()
