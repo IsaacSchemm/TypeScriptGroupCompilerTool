@@ -48,6 +48,7 @@ Module Module1
         Dim StartTime = DateTime.UtcNow
         Dim Tasks = TopLevelGroups.Select(Function(g) StartCompile(g)).ToArray()
         Task.WaitAll(Tasks)
+        Console.WriteLine()
         Console.WriteLine($"Total: {(DateTime.UtcNow - StartTime).TotalSeconds}s")
 
         If Tasks.Any(Function(t) t.Result = False) Then

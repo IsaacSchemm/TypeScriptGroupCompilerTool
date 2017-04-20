@@ -1,8 +1,6 @@
 ﻿Imports System.IO
 Imports System.Text
-Imports System.Web
 Imports System.Web.Script.Serialization
-Imports RunProcessAsTask
 
 Public Class CompilationGroup
     Private Shared Serializer As New JavaScriptSerializer
@@ -67,19 +65,18 @@ Public Class CompilationGroup
             .files = FullPaths}))
 
         ' Run tsc
-        Dim Results = Await ProcessEx.RunAsync(New ProcessStartInfo("C:/Program Files (x86)/Microsoft SDKs/TypeScript/2.1/tsc") With {
-            .WorkingDirectory = ProjectPath
+        Dim TSC = Process.Start(New ProcessStartInfo("C:/Program Files (x86)/Microsoft SDKs/TypeScript/2.1/tsc") With {
+            .WorkingDirectory = ProjectPath,
+            .UseShellExecute = False
         })
 
-        If Results.ExitCode <> 0 Then
+        While Not TSC.HasExited
+            Await Task.Delay(250)
+        End While
+
+        If TSC.ExitCode <> 0 Then
             Dim Message As New StringBuilder()
-            Message.AppendLine($"tsc could not compile group ""{Name}"".")
-            For Each Line In Results.StandardOutput
-                Message.AppendLine(Line)
-            Next
-            For Each Line In Results.StandardError
-                Message.AppendLine(Line)
-            Next
+            Message.AppendLine($"tsc could not compile group ""{Name}""")
             Throw New Exception(Message.ToString())
         End If
     End Function
