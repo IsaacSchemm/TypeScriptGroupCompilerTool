@@ -15,28 +15,28 @@ Module Module1
 
         Dim Groups As New List(Of CompilationGroup)
 
-        Using InputStream As New FileStream(InputFile, FileMode.Open, FileAccess.Read)
-            Using Reader As New StreamReader(InputStream)
-                Dim CurrentGroup As CompilationGroup = Nothing
-                Dim CurrentLine = Reader.ReadLine()
+        Dim Input = File.ReadAllLines(InputFile)
 
-                While CurrentLine IsNot Nothing
-                    If CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
-                        CurrentGroup = New CompilationGroup(CurrentLine.Substring(1, CurrentLine.Length - 2))
-                        Groups.Add(CurrentGroup)
-                    ElseIf Not String.IsNullOrWhiteSpace(CurrentLine) And Not CurrentLine.StartsWith(";") Then
-                        Dim ExistingGroup = Groups.SingleOrDefault(Function(g) g.Name = CurrentLine)
-                        If ExistingGroup IsNot Nothing Then
-                            CurrentGroup.Add(ExistingGroup)
-                        Else
-                            CurrentGroup.Add(CurrentLine)
-                        End If
-                    End If
+        For Each CurrentLine In Input
+            If CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
+                Dim Name = CurrentLine.Substring(1, CurrentLine.Length - 2)
+                Groups.Add(New CompilationGroup(Name))
+            End If
+        Next
 
-                    CurrentLine = Reader.ReadLine()
-                End While
-            End Using
-        End Using
+        Dim CurrentGroup As CompilationGroup = Nothing
+        For Each CurrentLine In Input
+            If CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
+                CurrentGroup = Groups.Single(Function(g) g.Name = CurrentLine.Substring(1, CurrentLine.Length - 2))
+            ElseIf Not String.IsNullOrWhiteSpace(CurrentLine) And Not CurrentLine.StartsWith(";") Then
+                Dim ExistingGroup = Groups.SingleOrDefault(Function(g) g.Name = CurrentLine)
+                If ExistingGroup IsNot Nothing Then
+                    CurrentGroup.Add(ExistingGroup)
+                Else
+                    CurrentGroup.Add(CurrentLine)
+                End If
+            End If
+        Next
 
         Dim TopLevelGroups As New List(Of CompilationGroup)
         For Each Group In Groups

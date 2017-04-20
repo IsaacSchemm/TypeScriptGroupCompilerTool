@@ -34,13 +34,7 @@ Public Class CompilationGroup
         Return Me.Dependencies.Contains(group)
     End Function
 
-    Public Function Compile() As Task
-        Return CompileInternal(Name, Paths, Dependencies)
-    End Function
-
-    Private Shared Async Function CompileInternal(Name As String,
-                                                  Paths As IEnumerable(Of String),
-                                                  Dependencies As IEnumerable(Of CompilationGroup)) As Task
+    Public Function GetFullPaths()
         Dim FullPaths = Paths.Select(Function(s) Path.GetFullPath(s)).ToList()
 
         ' Get *.ts files used by dependencies
@@ -48,6 +42,15 @@ Public Class CompilationGroup
             FullPaths.AddRange(Group.Paths.Select(Function(s) Path.GetFullPath(s)))
         Next
 
+        Return FullPaths
+    End Function
+
+    Public Function Compile() As Task
+        Return CompileInternal(Name, GetFullPaths())
+    End Function
+
+    Private Shared Async Function CompileInternal(Name As String,
+                                                  FullPaths As IEnumerable(Of String)) As Task
         ' See if there is a tsconfig.json in the current directory
         Dim BaseConfig = Path.GetFullPath("tsconfig.json")
         If Not File.Exists(BaseConfig) Then
