@@ -9,6 +9,7 @@ Public Class CompilationGroup
 
     Private ReadOnly Paths As HashSet(Of String)
     Private ReadOnly Dependencies As HashSet(Of CompilationGroup)
+    Private ProjectPath As String
 
     Public Sub New(Name As String)
         Me.Name = Name
@@ -45,37 +46,36 @@ Public Class CompilationGroup
         Return FullPaths
     End Function
 
-    Public Function Compile() As Task
-        Return CompileInternal(Name, GetFullPaths())
-    End Function
-
-    Private Shared Async Function CompileInternal(Name As String,
-                                                  FullPaths As IEnumerable(Of String)) As Task
+    Public Async Function Compile() As Task
         ' See if there is a tsconfig.json in the current directory
         Dim BaseConfig = Path.GetFullPath("tsconfig.json")
         If Not File.Exists(BaseConfig) Then
             BaseConfig = Nothing
         End If
 
-        ' Write a new tsconfig.json
+        ' Set up a temporary folder for tsconfig.json
         Dim ProjectPath = Path.Combine(Path.GetTempPath(), "TSC-CustomCompilationGroupTool-" & Guid.NewGuid().ToString())
         Directory.CreateDirectory(ProjectPath)
+
+        ' Write a new tsconfig.json
         Dim ConfigurationFile = Path.Combine(ProjectPath, "tsconfig.json")
         File.WriteAllText(ConfigurationFile, Serializer.Serialize(New With {
             .extends = BaseConfig,
             .compilerOptions = New With {
                 .sourceMap = True},
-            .files = FullPaths}))
+            .files = GetFullPaths()}))
 
         ' Run tsc
         Dim TSC = Process.Start(New ProcessStartInfo("C:/Program Files (x86)/Microsoft SDKs/TypeScript/2.1/tsc") With {
-            .WorkingDirectory = ProjectPath,
-            .UseShellExecute = False
+            .UseShellExecute = False,
+            .WorkingDirectory = ProjectPath
         })
 
         While Not TSC.HasExited
             Await Task.Delay(250)
         End While
+
+        Directory.Delete(ProjectPath, True)
 
         If TSC.ExitCode <> 0 Then
             Dim Message As New StringBuilder()

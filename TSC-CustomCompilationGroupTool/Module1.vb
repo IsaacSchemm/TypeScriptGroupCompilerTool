@@ -70,6 +70,7 @@ Module Module1
         Catch ex As Exception
             Console.Error.WriteLine($"{Group.Name}: {ex.Message}")
             Console.Error.WriteLine(ex.StackTrace)
+            Console.Error.WriteLine()
             Return False
         End Try
     End Function
