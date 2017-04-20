@@ -12,8 +12,6 @@ Public Class CompilationGroup
     Private ReadOnly Paths As HashSet(Of String)
     Private ReadOnly Dependencies As HashSet(Of CompilationGroup)
 
-    Private CompilationTask As Task
-
     Public Sub New(Name As String)
         Me.Name = Name
         Me.Paths = New HashSet(Of String)
@@ -38,64 +36,52 @@ Public Class CompilationGroup
         Return Me.Dependencies.Contains(group)
     End Function
 
-    Public Function Compile() As Task(Of IEnumerable(Of String))
-        SyncLock Me
-            If CompilationTask Is Nothing Then
-                CompilationTask = CompileInternal(Name, Paths, Dependencies)
-            End If
-            Return CompilationTask
-        End SyncLock
+    Public Function Compile() As Task
+        Return CompileInternal(Name, Paths, Dependencies)
     End Function
 
     Private Shared Async Function CompileInternal(Name As String,
                                                   Paths As IEnumerable(Of String),
-                                                  Dependencies As IEnumerable(Of CompilationGroup)) As Task(Of IEnumerable(Of String))
+                                                  Dependencies As IEnumerable(Of CompilationGroup)) As Task
         Dim FullPaths = Paths.Select(Function(s) Path.GetFullPath(s)).ToList()
 
         ' Get *.ts files used by dependencies
-        Dim CompilationTasks As New List(Of Task(Of IEnumerable(Of String)))
         For Each Group In Dependencies
             FullPaths.AddRange(Group.Paths.Select(Function(s) Path.GetFullPath(s)))
         Next
 
-        Dim dt = DateTime.UtcNow
-        If FullPaths.Any Then
-            ' See if there is a tsconfig.json in the current directory
-            Dim BaseConfig = Path.GetFullPath("tsconfig.json")
-            If Not File.Exists(BaseConfig) Then
-                BaseConfig = Nothing
-            End If
-
-            ' Write a new tsconfig.json
-            Dim ProjectPath = Path.Combine(Path.GetTempPath(), "TSC-CustomCompilationGroupTool-" & Guid.NewGuid().ToString())
-            Directory.CreateDirectory(ProjectPath)
-            Dim ConfigurationFile = Path.Combine(ProjectPath, "tsconfig.json")
-            File.WriteAllText(ConfigurationFile, Serializer.Serialize(New With {
-                .extends = BaseConfig,
-                .compilerOptions = New With {
-                    .sourceMap = True},
-                .files = FullPaths}))
-
-            ' Run tsc
-            Dim Results = Await ProcessEx.RunAsync(New ProcessStartInfo("C:/Program Files (x86)/Microsoft SDKs/TypeScript/2.1/tsc") With {
-                .WorkingDirectory = ProjectPath
-            })
-
-            ' Print output of tsc to console
-            For Each Line In Results.StandardOutput
-                Console.WriteLine(Line)
-            Next
-            For Each Line In Results.StandardError
-                Console.Error.WriteLine(Line)
-            Next
-
-            If Results.ExitCode <> 0 Then
-                Throw New Exception($"The TypeScript compiler was unable to compile {Name} successfully.")
-            End If
+        ' See if there is a tsconfig.json in the current directory
+        Dim BaseConfig = Path.GetFullPath("tsconfig.json")
+        If Not File.Exists(BaseConfig) Then
+            BaseConfig = Nothing
         End If
 
-        Console.WriteLine(Name & ": " & (DateTime.UtcNow - dt).TotalSeconds)
-        Return FullPaths
+        ' Write a new tsconfig.json
+        Dim ProjectPath = Path.Combine(Path.GetTempPath(), "TSC-CustomCompilationGroupTool-" & Guid.NewGuid().ToString())
+        Directory.CreateDirectory(ProjectPath)
+        Dim ConfigurationFile = Path.Combine(ProjectPath, "tsconfig.json")
+        File.WriteAllText(ConfigurationFile, Serializer.Serialize(New With {
+            .extends = BaseConfig,
+            .compilerOptions = New With {
+                .sourceMap = True},
+            .files = FullPaths}))
+
+        ' Run tsc
+        Dim Results = Await ProcessEx.RunAsync(New ProcessStartInfo("C:/Program Files (x86)/Microsoft SDKs/TypeScript/2.1/tsc") With {
+            .WorkingDirectory = ProjectPath
+        })
+
+        If Results.ExitCode <> 0 Then
+            Dim Message As New StringBuilder()
+            Message.AppendLine($"tsc could not compile group ""{Name}"".")
+            For Each Line In Results.StandardOutput
+                Message.AppendLine(Line)
+            Next
+            For Each Line In Results.StandardError
+                Message.AppendLine(Line)
+            Next
+            Throw New Exception(Message.ToString())
+        End If
     End Function
 
     Public Overrides Function ToString() As String
