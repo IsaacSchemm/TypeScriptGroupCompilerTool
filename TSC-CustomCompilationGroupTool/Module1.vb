@@ -41,11 +41,13 @@ Module Module1
                 End Using
             End Using
 
-            Dim GroupAll As New CompilationGroup("META")
+            Dim TopLevelGroups As New List(Of CompilationGroup)
             For Each Group In Groups
-                GroupAll.Add(group)
+                If Not Groups.Any(Function(g) g.DependsOn(Group)) Then
+                    TopLevelGroups.Add(Group)
+                End If
             Next
-            GroupAll.Compile().Wait()
+            Task.WaitAll(TopLevelGroups.Select(Function(g) g.Compile()).ToArray())
         Catch ae As AggregateException
             For Each e In ae.InnerExceptions
                 Console.Error.WriteLine(e.Message)

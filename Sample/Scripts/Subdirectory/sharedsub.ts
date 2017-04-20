@@ -1,3 +1,3 @@
 ﻿function additional() {
-    return sharedFunction().toUpperCase();
+    return sharedFunction().toUpperCase() + getPageId();
 }

@@ -34,29 +34,32 @@ Public Class CompilationGroup
         Next
     End Sub
 
+    Public Function DependsOn(group As CompilationGroup) As Boolean
+        Return Me.Dependencies.Contains(group)
+    End Function
+
     Public Function Compile() As Task(Of IEnumerable(Of String))
         SyncLock Me
             If CompilationTask Is Nothing Then
-                CompilationTask = Me.CompileInternal()
+                CompilationTask = CompileInternal(Name, Paths, Dependencies)
             End If
             Return CompilationTask
         End SyncLock
     End Function
 
-    Private Async Function CompileInternal() As Task(Of IEnumerable(Of String))
+    Private Shared Async Function CompileInternal(Name As String,
+                                                  Paths As IEnumerable(Of String),
+                                                  Dependencies As IEnumerable(Of CompilationGroup)) As Task(Of IEnumerable(Of String))
         Dim FullPaths = Paths.Select(Function(s) Path.GetFullPath(s)).ToList()
 
         ' Get *.ts files used by dependencies
         Dim CompilationTasks As New List(Of Task(Of IEnumerable(Of String)))
         For Each Group In Dependencies
-            CompilationTasks.Add(Group.Compile())
-        Next
-        For Each Task In CompilationTasks
-            FullPaths.AddRange(Await Task)
+            FullPaths.AddRange(Group.Paths.Select(Function(s) Path.GetFullPath(s)))
         Next
 
         Dim dt = DateTime.UtcNow
-        If Paths.Any Then
+        If FullPaths.Any Then
             ' See if there is a tsconfig.json in the current directory
             Dim BaseConfig = Path.GetFullPath("tsconfig.json")
             If Not File.Exists(BaseConfig) Then
