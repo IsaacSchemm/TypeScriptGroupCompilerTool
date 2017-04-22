@@ -2,20 +2,28 @@
 Imports System.Reflection
 
 Module Module1
+    Iterator Function ReadStandardInput() As IEnumerable(Of String)
+        Using Reader As New StreamReader(Console.OpenStandardInput())
+            While Not Reader.EndOfStream
+                Yield Reader.ReadLine
+            End While
+        End Using
+    End Function
 
     Sub Main()
         Dim InputFile = My.Application.CommandLineArgs.FirstOrDefault
         If InputFile Is Nothing Then
             InputFile = Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location) & ".ini"
         End If
-        If Not File.Exists(InputFile) Then
-            Throw New Exception($"Could not find {InputFile}")
-            Return
+
+        Dim Input As String()
+        If InputFile = "-" Then
+            Input = ReadStandardInput().ToArray()
+        Else
+            Input = File.ReadAllLines(InputFile)
         End If
 
         Dim Groups As New List(Of CompilationGroup)
-
-        Dim Input = File.ReadAllLines(InputFile)
 
         For Each CurrentLine In Input
             If CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
