@@ -46,7 +46,7 @@ Public Class CompilationGroup
         Return FullPaths
     End Function
 
-    Public Async Function Compile() As Task
+    Public Async Function Compile(TypeScriptCompilerPath As String) As Task
         ' See if there is a tsconfig.json in the current directory
         Dim BaseConfig = Path.GetFullPath("tsconfig.json")
         If Not File.Exists(BaseConfig) Then
@@ -68,7 +68,7 @@ Public Class CompilationGroup
             .files = GetFullPaths()}))
 
         ' Run tsc
-        Dim TSC = Process.Start(New ProcessStartInfo("C:/Program Files (x86)/Microsoft SDKs/TypeScript/2.1/tsc") With {
+        Dim TSC = Process.Start(New ProcessStartInfo(TypeScriptCompilerPath) With {
             .UseShellExecute = False,
             .WorkingDirectory = ProjectPath
         })

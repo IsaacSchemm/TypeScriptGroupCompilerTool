@@ -53,11 +53,53 @@ Module Module1
             End If
         Next
 
-        Dim StartTime = DateTime.UtcNow
-        Dim Tasks = TopLevelGroups.Select(Function(g) StartCompile(g)).ToArray()
+        Dim TypeScriptCompilerPath As String = Nothing
+        If File.Exists("tsc.exe") Then
+            TypeScriptCompilerPath = "tsc.exe"
+        Else
+            For Each ProgramFilesDir In New String() {
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)}
+                Dim TypeScriptPath = Path.Combine(ProgramFilesDir, "Microsoft SDKs", "TypeScript")
+                If Directory.Exists(TypeScriptPath) Then
+                    Dim FoundVersion As Decimal = 0
+                    For Each Subdirectory In Directory.EnumerateDirectories(TypeScriptPath)
+                        Dim Version As Decimal = Path.GetFileName(Subdirectory)
+                        Dim PossibleCompilerPath = Path.Combine(Subdirectory, "tsc.exe")
+                        If File.Exists(PossibleCompilerPath) Then
+                            FoundVersion = Math.Max(FoundVersion, Version)
+                        End If
+                    Next
+                    If FoundVersion > 0 Then
+                        TypeScriptCompilerPath = Path.Combine(TypeScriptPath, FoundVersion, "tsc.exe")
+                    End If
+                End If
+            Next
+        End If
+
+        If TypeScriptCompilerPath Is Nothing Then
+            Throw New Exception("Cannot find tsc.exe")
+        Else
+            Dim GetVersion = New ProcessStartInfo(TypeScriptCompilerPath, "-v") With {
+                .UseShellExecute = False,
+                .RedirectStandardOutput = True
+            }
+            Dim CompilerVersionProcess = Process.Start(GetVersion)
+            CompilerVersionProcess.WaitForExit()
+
+            Dim Version = CompilerVersionProcess.StandardOutput.ReadToEnd().Replace("Version ", "").Trim()
+
+            Console.WriteLine($"Using TypeScript {Version}")
+            Console.WriteLine($"Compiler path: {TypeScriptCompilerPath}")
+            Console.WriteLine()
+        End If
+
+        Dim StartTime = Date.UtcNow
+        Dim Tasks = (From Group In TopLevelGroups
+                     Select StartCompile(TypeScriptCompilerPath, Group)).ToArray()
         Task.WaitAll(Tasks)
         Console.WriteLine()
-        Console.WriteLine($"Total: {(DateTime.UtcNow - StartTime).TotalSeconds}s")
+        Console.WriteLine($"Total: {(Date.UtcNow - StartTime).TotalSeconds}s")
 
         If Tasks.Any(Function(t) t.Result = False) Then
             Console.WriteLine()
@@ -68,12 +110,12 @@ Module Module1
         End If
     End Sub
 
-    Async Function StartCompile(Group As CompilationGroup) As Task(Of Boolean)
+    Async Function StartCompile(TypeScriptCompilerPath As String, Group As CompilationGroup) As Task(Of Boolean)
         Try
-            Dim StartTime = DateTime.UtcNow
+            Dim StartTime = Date.UtcNow
             'Console.WriteLine($"Starting: {Group.Name}")
-            Await Group.Compile()
-            Console.WriteLine($"{Group.Name}: {(DateTime.UtcNow - StartTime).TotalSeconds}s")
+            Await Group.Compile(TypeScriptCompilerPath)
+            Console.WriteLine($"{Group.Name}: {(Date.UtcNow - StartTime).TotalSeconds}s")
             Return True
         Catch ex As Exception
             Console.Error.WriteLine($"{Group.Name}: {ex.Message}")
