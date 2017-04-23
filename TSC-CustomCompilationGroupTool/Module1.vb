@@ -56,28 +56,11 @@ Module Module1
             End If
         Next
 
-        Dim TypeScriptCompilerPath = FindTypeScriptCompiler()
-
-        If TypeScriptCompilerPath Is Nothing Then
-            Throw New Exception("Cannot find tsc.exe")
-        Else
-            Dim GetVersion = New ProcessStartInfo(TypeScriptCompilerPath, "-v") With {
-                .UseShellExecute = False,
-                .RedirectStandardOutput = True
-            }
-            Dim CompilerVersionProcess = Process.Start(GetVersion)
-            CompilerVersionProcess.WaitForExit()
-
-            Dim Version = CompilerVersionProcess.StandardOutput.ReadToEnd().Replace("Version ", "").Trim()
-
-            Console.WriteLine($"Using TypeScript {Version}")
-            Console.WriteLine($"Compiler path: {TypeScriptCompilerPath}")
-            Console.WriteLine()
-        End If
+        PrintTypeScriptVersionInfo()
 
         Dim StartTime = Date.UtcNow
         Dim Tasks = (From Group In TopLevelGroups
-                     Select StartCompile(TypeScriptCompilerPath, Group)).ToArray()
+                     Select StartCompile(Group)).ToArray()
         Task.WaitAll(Tasks)
         Console.WriteLine()
         Console.WriteLine($"Total: {(Date.UtcNow - StartTime).TotalSeconds}s")
@@ -91,11 +74,11 @@ Module Module1
         End If
     End Sub
 
-    Async Function StartCompile(TypeScriptCompilerPath As String, Group As CompilationGroup) As Task(Of Boolean)
+    Async Function StartCompile(Group As CompilationGroup) As Task(Of Boolean)
         Try
             Dim StartTime = Date.UtcNow
             'Console.WriteLine($"Starting: {Group.Name}")
-            Await Group.Compile(TypeScriptCompilerPath)
+            Await Group.Compile()
             Console.WriteLine($"{Group.Name}: {(Date.UtcNow - StartTime).TotalSeconds}s")
             Return True
         Catch ex As Exception

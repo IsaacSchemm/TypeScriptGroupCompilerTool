@@ -41,4 +41,25 @@ Module CompilerPathSearch
             Return Nothing
         End If
     End Function
+
+    Sub PrintTypeScriptVersionInfo()
+        Dim TypeScriptCompilerPath = FindTypeScriptCompiler()
+
+        If TypeScriptCompilerPath Is Nothing Then
+            Throw New Exception("Cannot find tsc.exe")
+        Else
+            Dim GetVersion = New ProcessStartInfo(TypeScriptCompilerPath, "-v") With {
+                .UseShellExecute = False,
+                .RedirectStandardOutput = True
+            }
+            Dim CompilerVersionProcess = Process.Start(GetVersion)
+            CompilerVersionProcess.WaitForExit()
+
+            Dim Version = CompilerVersionProcess.StandardOutput.ReadToEnd().Replace("Version ", "").Trim()
+
+            Console.WriteLine($"Using TypeScript {Version}")
+            Console.WriteLine($"Compiler path: {TypeScriptCompilerPath}")
+            Console.WriteLine()
+        End If
+    End Sub
 End Module

@@ -46,7 +46,13 @@ Public Class CompilationGroup
         Return FullPaths
     End Function
 
-    Public Async Function Compile(TypeScriptCompilerPath As String) As Task
+    Public Async Function Compile() As Task
+        Dim TypeScriptCompilerPath = FindTypeScriptCompiler()
+
+        If TypeScriptCompilerPath Is Nothing Then
+            Throw New Exception("Cannot find tsc.exe")
+        End If
+
         ' See if there is a tsconfig.json in the current directory
         Dim BaseConfig = Path.GetFullPath("tsconfig.json")
         If Not File.Exists(BaseConfig) Then
