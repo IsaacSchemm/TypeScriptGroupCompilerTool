@@ -28,6 +28,9 @@ Module Module1
         For Each CurrentLine In Input
             If CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
                 Dim Name = CurrentLine.Substring(1, CurrentLine.Length - 2)
+                If Not Char.IsLower(Name(0)) Then
+                    Throw New Exception("Group names in the INI file must start with a lowercase letter.")
+                End If
                 Groups.Add(New CompilationGroup(Name))
             End If
         Next
