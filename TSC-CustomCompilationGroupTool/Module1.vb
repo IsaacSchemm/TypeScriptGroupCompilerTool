@@ -53,29 +53,7 @@ Module Module1
             End If
         Next
 
-        Dim TypeScriptCompilerPath As String = Nothing
-        If File.Exists("tsc.exe") Then
-            TypeScriptCompilerPath = "tsc.exe"
-        Else
-            For Each ProgramFilesDir In New String() {
-                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)}
-                Dim TypeScriptPath = Path.Combine(ProgramFilesDir, "Microsoft SDKs", "TypeScript")
-                If Directory.Exists(TypeScriptPath) Then
-                    Dim FoundVersion As Decimal = 0
-                    For Each Subdirectory In Directory.EnumerateDirectories(TypeScriptPath)
-                        Dim Version As Decimal = Path.GetFileName(Subdirectory)
-                        Dim PossibleCompilerPath = Path.Combine(Subdirectory, "tsc.exe")
-                        If File.Exists(PossibleCompilerPath) Then
-                            FoundVersion = Math.Max(FoundVersion, Version)
-                        End If
-                    Next
-                    If FoundVersion > 0 Then
-                        TypeScriptCompilerPath = Path.Combine(TypeScriptPath, FoundVersion, "tsc.exe")
-                    End If
-                End If
-            Next
-        End If
+        Dim TypeScriptCompilerPath = FindTypeScriptCompiler()
 
         If TypeScriptCompilerPath Is Nothing Then
             Throw New Exception("Cannot find tsc.exe")
