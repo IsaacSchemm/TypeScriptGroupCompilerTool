@@ -1,4 +1,8 @@
-﻿Imports System.IO
+﻿' This Source Code Form is subject to the terms of the Mozilla Public
+' License, v. 2.0. If a copy of the MPL was not distributed with this
+' file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+Imports System.IO
 Imports System.Reflection
 
 Module Module1
@@ -10,6 +14,18 @@ Module Module1
         End Using
     End Function
 
+    Private Sub PrintHelp(InputFile As String)
+        Console.WriteLine("TypeScriptGroupCompilerTool")
+        Console.WriteLine("version 20170424")
+        Console.WriteLine()
+        Console.WriteLine("If you run this program without any command-line arguments, it will look for a .ini file in the current directory (with the same name as the executable.) You can also specify the path to a .ini file on the command line.")
+        Console.WriteLine()
+        Console.WriteLine("If an error is encountered, this program will pause for user input before closing.")
+        Console.WriteLine()
+        Console.WriteLine("This program is subject to the terms of the Mozilla Public License, v. 2.0. Source code is available at:")
+        Console.WriteLine("https://github.com/IsaacSchemm/TypeScriptGroupCompilerTool")
+    End Sub
+
     Sub Main()
         Try
             Dim InputFile = My.Application.CommandLineArgs.FirstOrDefault
@@ -20,6 +36,9 @@ Module Module1
             Dim Input As String()
             If InputFile = "-" Then
                 Input = ReadStandardInput().ToArray()
+            ElseIf InputFile = "--help" OrElse InputFile = "/?" Then
+                PrintHelp(InputFile)
+                Exit Sub
             Else
                 Input = File.ReadAllLines(InputFile)
             End If
