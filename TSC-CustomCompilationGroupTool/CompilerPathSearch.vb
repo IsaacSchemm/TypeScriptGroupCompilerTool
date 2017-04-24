@@ -3,6 +3,10 @@
 Module CompilerPathSearch
     Dim CachedPath As String = Nothing
 
+    Sub SetCompilerPath(Path As String)
+        CachedPath = Path
+    End Sub
+
     Function FindTypeScriptCompiler() As String
         If CachedPath Is Nothing Then
             CachedPath = FindTypeScriptCompilerInternal()
@@ -55,7 +59,7 @@ Module CompilerPathSearch
             Dim CompilerVersionProcess = Process.Start(GetVersion)
             CompilerVersionProcess.WaitForExit()
 
-            Dim Version = CompilerVersionProcess.StandardOutput.ReadToEnd().Replace("Version ", "").Trim()
+            Dim Version = CompilerVersionProcess.StandardOutput.ReadToEnd().Split(" ").Last().Trim()
 
             Console.WriteLine($"Using TypeScript {Version}")
             Console.WriteLine($"Compiler path: {TypeScriptCompilerPath}")

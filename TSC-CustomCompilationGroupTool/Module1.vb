@@ -27,6 +27,25 @@ Module Module1
 
         For Each CurrentLine In Input
             If CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
+                Exit For
+            End If
+
+            If CurrentLine.StartsWith(";") Then
+                Continue For
+            End If
+
+            Dim EqIndex = CurrentLine.IndexOf("="c)
+            If EqIndex >= 0 Then
+                Dim Name = CurrentLine.Substring(0, EqIndex).Trim()
+                Dim Value = CurrentLine.Substring(EqIndex + 1).Trim()
+                If Name = "TypeScriptCompilerPath" Then
+                    SetCompilerPath(Value)
+                End If
+            End If
+        Next
+
+        For Each CurrentLine In Input
+            If CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
                 Dim Name = CurrentLine.Substring(1, CurrentLine.Length - 2)
                 If Not Char.IsLower(Name(0)) Then
                     Throw New Exception("Group names in the INI file must start with a lowercase letter.")
@@ -37,9 +56,15 @@ Module Module1
 
         Dim CurrentGroup As CompilationGroup = Nothing
         For Each CurrentLine In Input
-            If CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
-                CurrentGroup = Groups.Single(Function(g) g.Name = CurrentLine.Substring(1, CurrentLine.Length - 2))
-            ElseIf Not String.IsNullOrWhiteSpace(CurrentLine) And Not CurrentLine.StartsWith(";") Then
+            If String.IsNullOrWhiteSpace(CurrentLine) Or CurrentLine.StartsWith(";") Then
+                ' skip
+            ElseIf CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
+                If Char.IsLower(CurrentLine(1)) Then
+                    CurrentGroup = Groups.Single(Function(g) g.Name = CurrentLine.Substring(1, CurrentLine.Length - 2))
+                Else
+                    CurrentGroup = Nothing
+                End If
+            ElseIf CurrentGroup IsNot Nothing Then
                 Dim ExistingGroup = Groups.SingleOrDefault(Function(g) g.Name = CurrentLine)
                 If ExistingGroup IsNot Nothing Then
                     CurrentGroup.Add(ExistingGroup)
