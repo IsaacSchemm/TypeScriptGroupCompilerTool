@@ -8,7 +8,7 @@ Imports System.Reflection
 Module Module1
     Private Sub PrintHelp(InputFile As String)
         Console.WriteLine("TypeScriptGroupCompilerTool")
-        Console.WriteLine("version 20170424")
+        Console.WriteLine("version 1.0")
         Console.WriteLine()
         Console.WriteLine("If you run this program without any command-line arguments, it will look for a .ini file in the current directory (with the same name as the executable.) You can also specify the path to a .ini file on the command line.")
         Console.WriteLine()
