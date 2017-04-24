@@ -75,9 +75,14 @@ Public Class CompilationGroup
 
         ' Run tsc
         Dim TSC = Process.Start(New ProcessStartInfo(TypeScriptCompilerPath) With {
+            .RedirectStandardError = True,
+            .RedirectStandardOutput = True,
             .UseShellExecute = False,
             .WorkingDirectory = ProjectPath
         })
+
+        Dim PrintToOutputTask = PrintToConsole(Name, TSC.StandardOutput, Console.Out)
+        Dim PrintToErrorTask = PrintToConsole(Name, TSC.StandardError, Console.Error)
 
         While Not TSC.HasExited
             Await Task.Delay(250)
@@ -93,11 +98,25 @@ Public Class CompilationGroup
             Await Task.Delay(500)
         Next
 
+        Await PrintToOutputTask
+        Await PrintToErrorTask
+
         If TSC.ExitCode <> 0 Then
             Dim Message As New StringBuilder()
             Message.AppendLine($"tsc could not compile group ""{Name}""")
             Throw New Exception(Message.ToString().Trim())
         End If
+    End Function
+
+    Private Shared Async Function PrintToConsole(Name As String, Reader As StreamReader, Writer As TextWriter) As Task
+        Do
+            Dim Line = Await Reader.ReadLineAsync()
+            If Line Is Nothing Then
+                Exit Do
+            ElseIf Line <> "" Then
+                Await Writer.WriteLineAsync($"{Name}: {Line}")
+            End If
+        Loop
     End Function
 
     Public Overrides Function ToString() As String
