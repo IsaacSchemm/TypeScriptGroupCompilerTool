@@ -47,9 +47,6 @@ Module Module1
         For Each CurrentLine In Input
             If CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
                 Dim Name = CurrentLine.Substring(1, CurrentLine.Length - 2)
-                If Not Char.IsLower(Name(0)) Then
-                    Throw New Exception("Group names in the INI file must start with a lowercase letter.")
-                End If
                 Groups.Add(New CompilationGroup(Name))
             End If
         Next
@@ -59,11 +56,7 @@ Module Module1
             If String.IsNullOrWhiteSpace(CurrentLine) Or CurrentLine.StartsWith(";") Then
                 ' skip
             ElseIf CurrentLine.StartsWith("[") And CurrentLine.EndsWith("]") Then
-                If Char.IsLower(CurrentLine(1)) Then
-                    CurrentGroup = Groups.Single(Function(g) g.Name = CurrentLine.Substring(1, CurrentLine.Length - 2))
-                Else
-                    CurrentGroup = Nothing
-                End If
+                CurrentGroup = Groups.Single(Function(g) g.Name = CurrentLine.Substring(1, CurrentLine.Length - 2))
             ElseIf CurrentGroup IsNot Nothing Then
                 Dim ExistingGroup = Groups.SingleOrDefault(Function(g) g.Name = CurrentLine)
                 If ExistingGroup IsNot Nothing Then

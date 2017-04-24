@@ -49,7 +49,7 @@ Module CompilerPathSearch
     Sub PrintTypeScriptVersionInfo()
         Dim TypeScriptCompilerPath = FindTypeScriptCompiler()
 
-        If TypeScriptCompilerPath Is Nothing Then
+        If TypeScriptCompilerPath Is Nothing Or Not File.Exists(TypeScriptCompilerPath) Then
             Throw New Exception("Cannot find tsc.exe")
         Else
             Dim GetVersion = New ProcessStartInfo(TypeScriptCompilerPath, "-v") With {
