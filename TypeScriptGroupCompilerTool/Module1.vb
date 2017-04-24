@@ -6,14 +6,6 @@ Imports System.IO
 Imports System.Reflection
 
 Module Module1
-    Iterator Function ReadStandardInput() As IEnumerable(Of String)
-        Using Reader As New StreamReader(Console.OpenStandardInput())
-            While Not Reader.EndOfStream
-                Yield Reader.ReadLine
-            End While
-        End Using
-    End Function
-
     Private Sub PrintHelp(InputFile As String)
         Console.WriteLine("TypeScriptGroupCompilerTool")
         Console.WriteLine("version 20170424")
@@ -35,7 +27,9 @@ Module Module1
 
             Dim Input As String()
             If InputFile = "-" Then
-                Input = ReadStandardInput().ToArray()
+                Console.Error.WriteLine("Reading from standard input is not supported.")
+                Environment.ExitCode = 1
+                Exit Sub
             ElseIf InputFile = "--help" OrElse InputFile = "/?" Then
                 PrintHelp(InputFile)
                 Exit Sub
