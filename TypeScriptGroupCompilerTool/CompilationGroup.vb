@@ -96,7 +96,7 @@ Public Class CompilationGroup
         If TSC.ExitCode <> 0 Then
             Dim Message As New StringBuilder()
             Message.AppendLine($"tsc could not compile group ""{Name}""")
-            Throw New Exception(Message.ToString())
+            Throw New Exception(Message.ToString().Trim())
         End If
     End Function
 
