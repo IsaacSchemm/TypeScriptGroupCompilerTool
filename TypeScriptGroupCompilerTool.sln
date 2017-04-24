@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TSC-CustomCompilationGroupTool", "TSC-CustomCompilationGroupTool\TSC-CustomCompilationGroupTool.vbproj", "{BA7B0CD0-501E-4268-9E06-09EC4810BD32}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TypeScriptGroupCompilerTool", "TypeScriptGroupCompilerTool\TypeScriptGroupCompilerTool.vbproj", "{BA7B0CD0-501E-4268-9E06-09EC4810BD32}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Sample", "Sample\Sample.vbproj", "{3A4B1899-348C-4A1D-ADAC-038F881BAA10}"
 EndProject

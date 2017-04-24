@@ -6,9 +6,9 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{BA7B0CD0-501E-4268-9E06-09EC4810BD32}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <StartupObject>TSC_CustomCompilationGroupTool.Module1</StartupObject>
-    <RootNamespace>TSC_CustomCompilationGroupTool</RootNamespace>
-    <AssemblyName>TSC-CustomCompilationGroupTool</AssemblyName>
+    <StartupObject>TypeScriptGroupCompilerTool.Module1</StartupObject>
+    <RootNamespace>TypeScriptGroupCompilerTool</RootNamespace>
+    <AssemblyName>TypeScriptGroupCompilerTool</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Console</MyType>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
@@ -21,7 +21,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>TSC-CustomCompilationGroupTool.xml</DocumentationFile>
+    <DocumentationFile>TypeScriptGroupCompilerTool.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -31,7 +31,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>TSC-CustomCompilationGroupTool.xml</DocumentationFile>
+    <DocumentationFile>TypeScriptGroupCompilerTool.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
