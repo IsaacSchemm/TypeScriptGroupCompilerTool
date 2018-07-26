@@ -25,6 +25,10 @@ Public Class CompilationGroup
         Paths.Add(FilePath)
     End Sub
 
+    Public Function Contains(FilePath As String) As Boolean
+        Return Paths.Contains(FilePath)
+    End Function
+
     Public Sub Add(Group As CompilationGroup)
         If Group.Dependencies.Contains(Me) Then
             Throw New Exception($"Circular dependency detected: {Me} is already a dependency of {Group}")

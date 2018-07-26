@@ -4,6 +4,7 @@
 
 Imports System.IO
 Imports System.Reflection
+Imports System.Threading
 
 Module Module1
     Private Sub PrintHelp(InputFile As String)
@@ -101,7 +102,7 @@ Module Module1
             If FailedCount > 0 Then
                 Throw New Exception(FailedCount & " task(s) failed.")
             Else
-                Threading.Thread.Sleep(1000)
+                Thread.Sleep(1000)
             End If
         Catch e As Exception
             If e.GetType().Name <> "Exception" Then
@@ -115,10 +116,14 @@ Module Module1
         End Try
     End Sub
 
+    Private Semaphore As New SemaphoreSlim(Environment.ProcessorCount, Environment.ProcessorCount)
+
     Async Function StartCompile(Group As CompilationGroup) As Task(Of Boolean)
         Try
             Dim StartTime = Date.UtcNow
+            Await Semaphore.WaitAsync()
             Await Group.Compile()
+            Semaphore.Release()
             Console.WriteLine($"{Group.Name}: {(Date.UtcNow - StartTime).TotalSeconds}s")
             Return True
         Catch ex As Exception
